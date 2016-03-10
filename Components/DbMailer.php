@@ -21,11 +21,40 @@ class DbMailer extends Mailer
      */
     public $checker = true;
 
+    /**
+     * Send as fromCode, but with fallback to raw
+     *
+     * @param $code
+     * @param $subject
+     * @param $message
+     * @param $receiver
+     * @param array $data
+     * @param array $attachments
+     * @param string $template
+     * @return array|bool
+     */
+    public function fromCodeOrRaw($code, $subject, $message, $receiver, $data = [], $attachments = [], $template = 'mail/message')
+    {
+        if (MailTemplate::objects()->filter(['code' => $code])->count() > 0) {
+            return $this->fromCode($code, $receiver, $data, $attachments, $template);
+        } else {
+            return $this->raw($subject, $message, $receiver, $attachments, $template);
+        }
+    }
+
+    public function fromCodeOrDefault($code, $subject, $receiver, $data = [], $attachments = [], $template = 'mail/message')
+    {
+        if (MailTemplate::objects()->filter(['code' => $code])->count() > 0) {
+            return $this->fromCode($code, $receiver, $data, $attachments, $template);
+        } else {
+            return $this->defaultTemplate($subject, $receiver, $attachments, $template);
+        }
+    }
+
     public function fromCode($code, $receiver, $data = [], $attachments = [], $template = 'mail/message')
     {
-        $uniq = uniqid();
         $templateModel = $this->loadTemplateModel($code);
-        
+
         $site = null;
         if (Mindy::app()->hasModule('Sites')) {
             $site = Mindy::app()->getModule('Sites')->getSite();
@@ -33,6 +62,26 @@ class DbMailer extends Mailer
 
         $subject = $this->renderString($templateModel->subject, array_merge(['site' => $site], $data));
         $message = $this->renderString($templateModel->template, array_merge(['site' => $site], $data));
+
+        return $this->raw($subject, $message, $receiver, $attachments, $template);
+    }
+
+    public function defaultTemplate($subject, $receiver, $data = [], $attachments = [], $template = 'mail/message')
+    {
+
+        $site = null;
+        if (Mindy::app()->hasModule('Sites')) {
+            $site = Mindy::app()->getModule('Sites')->getSite();
+        }
+
+        $message = $this->renderTemplate('mail/default.html', array_merge(['site' => $site], $data));
+
+        return $this->raw($subject, $message, $receiver, $attachments, $template);
+    }
+
+    public function raw($subject, $message, $receiver, $attachments = [], $template = 'mail/message')
+    {
+        $uniq = uniqid();
 
         $checker = '';
         if ($this->checker) {
