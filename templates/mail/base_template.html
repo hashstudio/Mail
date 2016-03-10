@@ -13,18 +13,16 @@
                 <tr>
                     <td style="background-color: #fff;" valign="top" align="center">
                         <table cellpadding="0" cellspacing="0" border="0" width="530" style="margin-top: 35px;">
-                            {% if logoPath %}
-                                <tr>
-                                    <td style="text-align: left; vertical-align: middle;">
-                                        {% block logo %}
-                                            <img src='{{ request.http.getHostInfo() }}{{ logoPath }}'/>
-                                        {% endblock %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td height="30"></td>
-                                </tr>
-                            {% endif %}
+                            <tr>
+                                <td style="text-align: left; vertical-align: middle;">
+                                    {% block logo %}
+                                        <img src='{{ request.http.getHostInfo() }}/static/images/main/logo.png'/>
+                                    {% endblock %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td height="30"></td>
+                            </tr>
                             <tr>
                                 <td valign="top" style="font-family: Arial;text-align: left;">
                                     {% block content %}{{ content|safe }}{% endblock %}
