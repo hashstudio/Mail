@@ -47,7 +47,7 @@ class DbMailer extends Mailer
         if (MailTemplate::objects()->filter(['code' => $code])->count() > 0) {
             return $this->fromCode($code, $receiver, $data, $attachments, $template);
         } else {
-            return $this->defaultTemplate($subject, $receiver, $attachments, $template);
+            return $this->defaultTemplate($subject, $receiver, $data, $attachments, $template);
         }
     }
 
